@@ -1,0 +1,4 @@
+patient_id,age,temperature,heart_rate,blood_pressure,symptoms,diagnosis
+P001,34,38.9,98,"120/80","fever,cough",Influenza
+P002,45,37.2,75,"110/70","headache,fatigue",Common Cold
+P003,60,40.1,125,"140/90","fever,shortness_of_breath",Pneumonia

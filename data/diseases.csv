@@ -1,0 +1,4 @@
+disease_id,disease_name,common_symptoms,severity_level
+D001,Common Cold,"fever,cough,fatigue",LOW
+D002,Influenza,"fever,headache,fatigue",MEDIUM
+D003,Pneumonia,"fever,cough,shortness_of_breath",CRITICAL
