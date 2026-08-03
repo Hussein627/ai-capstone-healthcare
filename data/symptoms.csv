@@ -1,0 +1,6 @@
+symptom_id,symptom_name,category
+S001,fever,vital
+S002,cough,respiratory
+S003,headache,neurological
+S004,fatigue,general
+S005,shortness_of_breath,respiratory
