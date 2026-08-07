@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intelligent Healthcare Diagnostic Assistant</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">HD</span>
+      <div>
+        <div class="brand-title">Healthcare Diagnostic Assistant</div>
+        <div class="brand-sub">CCS 3101 AI Capstone &middot; 7-module diagnostic pipeline</div>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="diagnose">Diagnose a Patient</button>
+      <button class="tab-btn" data-tab="evaluation">System Evaluation</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ═══════════════ DIAGNOSE TAB ═══════════════ -->
+  <section id="tab-diagnose" class="tab-panel active">
+    <div class="grid">
+
+      <!-- Input panel -->
+      <div class="card input-card">
+        <h2>Patient Intake</h2>
+
+        <label class="field-label">Quick-load a sample patient</label>
+        <select id="sampleSelect" class="select">
+          <option value="">— Manual entry —</option>
+          {% for p in samples %}
+          <option value="{{ loop.index0 }}">{{ p.id }} &mdash; {{ p.symptoms | join(', ') }}</option>
+          {% endfor %}
+        </select>
+
+        <div class="field-row">
+          <div>
+            <label class="field-label">Age</label>
+            <input type="number" id="age" value="35" min="0" max="120" class="input">
+          </div>
+          <div>
+            <label class="field-label">Temperature (&deg;C)</label>
+            <input type="number" id="temperature" value="37.0" step="0.1" class="input">
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label class="field-label">Heart Rate (bpm)</label>
+            <input type="number" id="heart_rate" value="75" class="input">
+          </div>
+          <div>
+            <label class="field-label">Blood Pressure</label>
+            <input type="text" id="blood_pressure" value="120/80" class="input">
+          </div>
+        </div>
+
+        <label class="field-label" style="margin-top:14px;">Symptoms</label>
+        <div class="symptom-grid">
+          {% for s in symptoms %}
+          <label class="chip">
+            <input type="checkbox" value="{{ s }}" class="symptom-check">
+            <span>{{ s.replace('_', ' ') }}</span>
+          </label>
+          {% endfor %}
+        </div>
+
+        <button id="diagnoseBtn" class="btn-primary">Run Diagnosis</button>
+        <div id="loadingMsg" class="loading-msg hidden">Consulting all 5 diagnostic modules&hellip;</div>
+        <div id="errorMsg" class="error-msg hidden"></div>
+      </div>
+
+      <!-- Results panel -->
+      <div class="card results-card" id="resultsCard">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">&#129658;</div>
+          <p>Select symptoms and click <strong>Run Diagnosis</strong> to see the agent's full reasoning.</p>
+        </div>
+        <div id="resultsContent" class="hidden"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════ EVALUATION TAB ═══════════════ -->
+  <section id="tab-evaluation" class="tab-panel">
+    <div class="card">
+      <h2>Module Accuracy &mdash; 150 Held-Out Synthetic Patients</h2>
+      <p class="muted">Learned models (ML Classifier, Neural Network) are fit directly to the data;
+      the Bayesian Net and Knowledge Base use fixed, hand-specified rules/probabilities &mdash;
+      this is an expected learned-vs-rule-based comparison.</p>
+      <div id="evalChart" class="eval-chart"></div>
+      <div id="evalLoading" class="loading-msg">Loading evaluation results&hellip;</div>
+    </div>
+  </section>
+
+</main>
+
+<script id="samplesData" type="application/json">{{ samples | tojson }}</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
