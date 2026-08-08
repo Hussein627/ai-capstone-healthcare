@@ -4,9 +4,12 @@
 # ============================================================
 
 import numpy as np
+from typing import Dict, List
 import tensorflow as tf
 from tensorflow.keras import layers, models, callbacks
-import matplotlib.pyplot as plt
+
+# --- IMPORTING YOUR NEW DEDICATED EVALUATION MODULES ---
+from evaluation.visualizations import Plotter
 
 class NeuralDiagnosticModel:
     """
@@ -126,12 +129,13 @@ class NeuralDiagnosticModel:
                 patience=5, min_lr=1e-6)
         ]
 
-        print("=" * 55)
-        print("  Neural Network — Medical Diagnosis Training")
-        print(f"  Architecture: {len(self.SYMPTOM_FEATURES)} → "
-              f"128 → 64 → 32 → {len(self.DISEASE_LABELS)}")
-        print("=" * 55)
-        self.model.summary()
+        if verbose:
+            print("=" * 55)
+            print("  Neural Network — Medical Diagnosis Training")
+            print(f"  Architecture: {len(self.SYMPTOM_FEATURES)} → "
+                  f"128 → 64 → 32 → {len(self.DISEASE_LABELS)}")
+            print("=" * 55)
+            self.model.summary()
 
         self.history = self.model.fit(
             X_train, y_train,
@@ -142,7 +146,8 @@ class NeuralDiagnosticModel:
 
         val_acc = max(self.history.history['val_accuracy'])
         self.is_trained = True
-        print(f"\n✅ Best Validation Accuracy: {val_acc:.4f}")
+        if verbose:
+            print(f"\n✅ Best Validation Accuracy: {val_acc:.4f}")
         return {'val_accuracy': val_acc}
 
     def predict(self, symptoms: List[str]) -> Dict:
@@ -176,31 +181,17 @@ class NeuralDiagnosticModel:
         return result
 
     def plot_training(self):
-        """Plot training history"""
+        """Plot training history using dedicated external module"""
+        # --- FIXED: Auto-train if history doesn't exist yet ---
+        if not self.is_trained or not self.history:
+            print("  [NeuralNetwork] Training deep learning model first to generate charts...")
+            self.train(epochs=50, verbose=0)
+            
         if not self.history:
-            print("Train model first!")
+            print("  [!] Error: Model failed to generate training history.")
             return
 
-        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-        metrics = [('accuracy', 'val_accuracy', 'Accuracy'),
-                   ('loss',     'val_loss',     'Loss')]
-        colors  = [('#3498db','#e74c3c'), ('#2ecc71','#e67e22')]
-
-        for ax, (train_m, val_m, title), (tc, vc) in zip(
-                axes, metrics, colors):
-            ax.plot(self.history.history[train_m],
-                    color=tc, linewidth=2, label='Train')
-            ax.plot(self.history.history[val_m],
-                    color=vc, linewidth=2,
-                    linestyle='--', label='Validation')
-            ax.set_title(f"Model {title}",
-                         fontsize=13, fontweight='bold')
-            ax.set_xlabel("Epoch")
-            ax.set_ylabel(title)
-            ax.legend(); ax.grid(True, alpha=0.3)
-
-        plt.suptitle("Neural Network Training Curves",
-                     fontsize=14, fontweight='bold')
-        plt.tight_layout()
-        plt.savefig("nn_training.png", dpi=150)
-        plt.show()
+        # --- NEW VISUALIZATION LOGIC ---
+        plotter = Plotter()
+        plotter.plot_training_history(self.history.history, filename="nn_training.png")
+        print("  [NeuralNetwork] Successfully saved nn_training.png")
