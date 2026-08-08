@@ -4,15 +4,18 @@
 # ============================================================
 
 import numpy as np
+from typing import Dict, List
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import classification_report, confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
 import warnings
+
+# --- IMPORTING YOUR NEW DEDICATED EVALUATION MODULES ---
+from evaluation.metrics import Evaluator
+from evaluation.visualizations import Plotter
+
 warnings.filterwarnings('ignore')
 
 class MLDiagnosticClassifier:
@@ -174,42 +177,18 @@ class MLDiagnosticClassifier:
         return result
 
     def plot_evaluation(self):
-        """Visualize model performance"""
+        """Evaluate model performance using dedicated external modules"""
         if not self.is_trained:
             self.train(verbose=False)
 
         y_pred = self.best_model.predict(self._X_test)
-        cm     = confusion_matrix(self._y_test, y_pred)
-        labels = self.label_encoder.classes_
+        classes = self.label_encoder.classes_.tolist()
 
-        fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+        # 1. Generate Mathematical Metrics
+        evaluator = Evaluator()
+        metrics = evaluator.calculate_classification_metrics(self._y_test, y_pred)
+        evaluator.print_report(metrics, self.best_model_name)
 
-        # Confusion Matrix
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                    xticklabels=labels, yticklabels=labels, ax=axes[0])
-        axes[0].set_title(f"Confusion Matrix\n({self.best_model_name})",
-                          fontweight='bold')
-        axes[0].set_xlabel("Predicted"); axes[0].set_ylabel("True")
-        plt.setp(axes[0].xaxis.get_majorticklabels(), rotation=45, ha='right')
-
-        # Feature Importance
-        if hasattr(self.best_model, 'feature_importances_'):
-            importances = self.best_model.feature_importances_
-            sorted_idx  = np.argsort(importances)[::-1][:12]
-            top_features = [self.SYMPTOM_FEATURES[i] for i in sorted_idx]
-            top_values   = importances[sorted_idx]
-            colors = plt.cm.RdYlGn(top_values / top_values.max())
-            axes[1].barh(range(len(top_features)), top_values[::-1],
-                         color=colors[::-1])
-            axes[1].set_yticks(range(len(top_features)))
-            axes[1].set_yticklabels(top_features[::-1])
-            axes[1].set_title("Feature Importances (Top 12)",
-                              fontweight='bold')
-            axes[1].set_xlabel("Importance Score")
-
-        plt.suptitle(f"ML Diagnostic Model Evaluation — {self.best_model_name}",
-                     fontsize=14, fontweight='bold')
-        plt.tight_layout()
-        plt.savefig("ml_evaluation.png", dpi=150, bbox_inches='tight')
-        plt.show()
-        print("✅ Saved: ml_evaluation.png")
+        # 2. Generate and Save Visualizations
+        plotter = Plotter()
+        plotter.plot_confusion_matrix(self._y_test, y_pred, classes=classes, filename="ml_evaluation.png")

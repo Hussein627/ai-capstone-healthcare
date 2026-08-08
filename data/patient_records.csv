@@ -1,4 +1,6 @@
-patient_id,age,temperature,heart_rate,blood_pressure,symptoms,diagnosis
-P001,34,38.9,98,"120/80","fever,cough",Influenza
-P002,45,37.2,75,"110/70","headache,fatigue",Common Cold
-P003,60,40.1,125,"140/90","fever,shortness_of_breath",Pneumonia
+
+PT-9121,2026-08-08T14:37:37.277618,"fever, rash",dengue,0.67,HIGH,URGENT_APPOINTMENT
+PT-1000,2026-08-08T14:48:09.390555,"fever, rash, cough",common_cold,0.70,CRITICAL,EMERGENCY_REFERRAL
+PT-1002,2026-08-08T15:20:24.746678,"fever, cough, fatigue",common_cold,0.71,HIGH,URGENT_APPOINTMENT
+PT-1004,2026-08-08T15:37:20.010991,"fever, joint_pain, headache, rash",dengue,0.84,HIGH,URGENT_APPOINTMENT
+PT-1001,2026-08-08T15:39:05.365771,"chest_pain, sweating, shortness_of_breath",cardiac_event,0.84,HIGH,URGENT_APPOINTMENT

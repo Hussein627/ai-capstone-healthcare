@@ -47,7 +47,8 @@ class TreatmentPlanner:
                 'name': 'ReceiveBloodResults',
                 'precond': {'BLOOD_RESULTS_PENDING'},
                 'delete':  {'BLOOD_RESULTS_PENDING'},
-                'add':     {'BLOOD_RESULTS_AVAILABLE', 'DIAGNOSIS_REFINED'},
+                # FIX: Blood results now properly confirm the diagnosis!
+                'add':     {'BLOOD_RESULTS_AVAILABLE', 'DIAGNOSIS_CONFIRMED'}, 
                 'cost': 0, 'duration': '2 hours'
             },
             {
@@ -207,9 +208,14 @@ class TreatmentPlanner:
 
     def analyze(self, percept) -> Dict:
         """Module interface — generates a sample plan"""
-        # This is called post-diagnosis; use KB result
         result = self.create_treatment_plan('flu', 'MEDIUM')
-        result['summary']    = f"Plan: {result['steps']} steps generated"
+        
+        # FIX: Safely handle if the AI fails to find a valid path
+        if 'error' in result:
+            result['summary'] = "Plan: Failed to find valid treatment path"
+        else:
+            result['summary'] = f"Plan: {result['steps']} steps generated"
+            
         result['diagnosis']  = 'flu'
         result['confidence'] = 0.7
         return result

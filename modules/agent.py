@@ -55,7 +55,7 @@ class HealthcareDiagnosticAgent:
         self.state   = AgentState.IDLE
         self.memory  = AgentMemory()
         self.performance_score = 0
-        self._modules = {}  # Will hold sub-modules
+        self._modules = {}
 
     def register_module(self, name: str, module):
         """Plug in AI sub-modules (KB, Bayes, ML, etc.)"""
@@ -81,8 +81,6 @@ class HealthcareDiagnosticAgent:
         self._log("Agent thinking: running diagnostic modules...")
 
         results = {}
-
-        # Run each registered module
         for module_name, module in self._modules.items():
             if hasattr(module, 'analyze'):
                 result = module.analyze(self.memory.current_patient)
@@ -98,15 +96,12 @@ class HealthcareDiagnosticAgent:
         self.state = AgentState.PLANNING
         patient = self.memory.current_patient
 
-        # Aggregate confidence from multiple modules
         confidences = [
             v.get('confidence', 0)
             for v in diagnosis_results.values()
             if isinstance(v, dict) and 'confidence' in v
         ]
         avg_confidence = sum(confidences)/len(confidences) if confidences else 0.5
-
-        # Determine urgency
         urgency = self._assess_urgency(patient, avg_confidence)
 
         action_report = {
@@ -128,6 +123,7 @@ class HealthcareDiagnosticAgent:
 
     def run(self, percept: PatientPercept) -> Dict:
         """Full agent cycle: Perceive → Think → Act"""
+        self.memory.action_log = []  # <--- FIX: Clear memory leak between runs
         self.perceive(percept)
         results = self.think()
         return self.act(results)
